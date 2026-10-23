@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agency Console</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div id="auth" class="auth hidden"></div>
+  <div id="shell" class="shell hidden">
+    <aside class="sidebar">
+      <div class="brand">Agency<span>Console</span></div>
+      <nav id="nav"></nav>
+    </aside>
+    <div class="main">
+      <header class="topbar">
+        <button id="menuBtn" class="icon-btn mobile-only" aria-label="Menu">☰</button>
+        <select id="accountSelect" aria-label="Account"></select>
+        <div class="grow"></div>
+        <span id="pauseBadge" class="badge danger hidden">Publishing paused</span>
+        <button id="pauseBtn" class="btn danger-outline" title="Emergency pause: stop all new publishing">Pause publishing</button>
+        <button id="notifBtn" class="icon-btn" aria-label="Notifications">🔔<span id="notifCount" class="dot hidden"></span></button>
+        <button id="themeBtn" class="icon-btn" aria-label="Toggle theme">◐</button>
+        <button id="logoutBtn" class="btn ghost">Sign out</button>
+      </header>
+      <div id="warnings"></div>
+      <main id="view" class="view"></main>
+    </div>
+  </div>
+  <div id="drawer" class="drawer hidden"></div>
+  <div id="toast" class="toast hidden"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

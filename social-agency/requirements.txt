@@ -1,0 +1,18 @@
+fastapi>=0.115
+uvicorn>=0.30
+sqlalchemy>=2.0
+httpx>=0.27
+anthropic>=2.0
+pydantic>=2.7
+cryptography>=42
+itsdangerous>=2.1
+python-multipart>=0.0.9
+pillow>=10.0
+numpy>=1.26
+reportlab>=4.0
+jinja2>=3.1
+# Postgres in production (optional):
+# psycopg[binary]>=3.1
+# Optional speech-to-text for Reels subtitles:
+# faster-whisper>=1.0
+pytest>=8.0
