@@ -156,3 +156,25 @@ def test_audit_report_scores_transparently(env):
         assert any(w["item"] == "No link in bio" for w in rep.data["findings"]["weaknesses"])
         assert rep.data["competitors"]["status"] == "partially_supported"
         assert s.scalar(select(Report).where(Report.kind == "audit")) is not None
+
+
+def test_public_deploy_setup_token_and_platform_key(env, monkeypatch):
+    from agency import config, db, security
+    from agency.api.app import create_app
+
+    monkeypatch.setenv("SETUP_TOKEN", "claim-me-123")
+    monkeypatch.setenv("TOKEN_ENCRYPTION_KEY", "a-random-platform-string-not-a-fernet-key")
+    monkeypatch.delenv("PUBLIC_BASE_URL")
+    monkeypatch.setenv("RENDER_EXTERNAL_URL", "https://social-agency.onrender.com")
+    config.reset_settings()
+    db.reset_engine()
+    assert config.get_settings().public_base_url == "https://social-agency.onrender.com"
+    assert config.get_settings().public_media_ready
+    assert security.decrypt(security.encrypt("tok")) == "tok"
+
+    client = TestClient(create_app())
+    assert client.get("/api/session").json()["setup_token_required"] is True
+    body = {"email": "o@x.com", "password": "longpassword1"}
+    assert client.post("/api/setup", json=body, headers=H).status_code == 403
+    assert client.post("/api/setup", json={**body, "setup_token": "wrong"}, headers=H).status_code == 403
+    assert client.post("/api/setup", json={**body, "setup_token": "claim-me-123"}, headers=H).status_code == 200

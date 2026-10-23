@@ -4,6 +4,7 @@
     python run.py web        # web only
     python run.py worker     # worker only
 """
+import os
 import sys
 import threading
 
@@ -11,7 +12,8 @@ import uvicorn
 
 
 def web():
-    uvicorn.run("agency.api.app:get_app", factory=True, host="0.0.0.0", port=8000, proxy_headers=True)
+    uvicorn.run("agency.api.app:get_app", factory=True, host="0.0.0.0",
+                port=int(os.environ.get("PORT", "8000")), proxy_headers=True, forwarded_allow_ips="*")
 
 
 def worker():

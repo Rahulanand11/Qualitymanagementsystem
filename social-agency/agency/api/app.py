@@ -101,6 +101,7 @@ def slugify(text: str) -> str:
 class Credentials(BaseModel):
     email: str
     password: str
+    setup_token: str = ""
 
 
 class NewUser(Credentials):
@@ -181,13 +182,17 @@ def register_routes(app: FastAPI) -> None:  # noqa: C901 - route table
         needs_setup = s.scalar(select(func.count(User.id))) == 0
         uid = request.session.get("uid")
         user = s.get(User, uid) if uid else None
-        return {"needs_setup": needs_setup, "user": {"email": user.email, "role": user.role} if user else None,
+        return {"needs_setup": needs_setup, "setup_token_required": needs_setup and bool(settings.setup_token),
+                "user": {"email": user.email, "role": user.role} if user else None,
                 "publishing_paused": publishing_globally_paused(s), "warnings": settings.warnings}
 
     @app.post("/api/setup")
     def setup(body: Credentials, request: Request, s: Session = Depends(get_session)):
         if s.scalar(select(func.count(User.id))):
             raise HTTPException(409, "Already set up")
+        # On a public URL, only someone who can read SETUP_TOKEN in the host's settings can claim the owner login.
+        if settings.setup_token and not secrets.compare_digest(body.setup_token.strip(), settings.setup_token):
+            raise HTTPException(403, "Wrong setup code (see SETUP_TOKEN in your hosting environment settings)")
         if len(body.password) < 10:
             raise HTTPException(400, "Use at least 10 characters")
         u = User(email=body.email.strip().lower(), password_hash=hash_password(body.password), role="owner")

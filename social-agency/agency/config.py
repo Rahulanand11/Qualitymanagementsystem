@@ -51,6 +51,7 @@ class Settings:
     ai_monthly_budget_usd: float = 50.0
     worker_interval_seconds: int = 15
     upload_stable_seconds: int = 10
+    setup_token: str = ""
     warnings: list[str] = field(default_factory=list)
 
     @property
@@ -97,7 +98,8 @@ def load_settings() -> Settings:
         database_url=env.get("DATABASE_URL", f"sqlite:///{data_dir / 'agency.db'}"),
         secret_key=env.get("SECRET_KEY", ""),
         token_encryption_key=env.get("TOKEN_ENCRYPTION_KEY", ""),
-        public_base_url=env.get("PUBLIC_BASE_URL", "http://localhost:8000").rstrip("/"),
+        # Render (and similar hosts) expose the service's public URL; use it when PUBLIC_BASE_URL is unset.
+        public_base_url=(env.get("PUBLIC_BASE_URL") or env.get("RENDER_EXTERNAL_URL") or "http://localhost:8000").rstrip("/"),
         meta_app_id=env.get("META_APP_ID", ""),
         meta_app_secret=env.get("META_APP_SECRET", ""),
         ig_api_version=env.get("IG_API_VERSION", "v23.0"),
@@ -108,6 +110,7 @@ def load_settings() -> Settings:
         ai_monthly_budget_usd=float(env.get("AI_MONTHLY_BUDGET_USD", "50")),
         worker_interval_seconds=int(env.get("WORKER_INTERVAL_SECONDS", "15")),
         upload_stable_seconds=int(env.get("UPLOAD_STABLE_SECONDS", "10")),
+        setup_token=env.get("SETUP_TOKEN", ""),
     )
     if s.is_production:
         missing = [k for k, v in (("SECRET_KEY", s.secret_key), ("TOKEN_ENCRYPTION_KEY", s.token_encryption_key)) if not v]

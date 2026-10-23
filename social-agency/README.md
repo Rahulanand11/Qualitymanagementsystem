@@ -36,6 +36,24 @@ python -m pytest                       # 19 end-to-end tests, all offline (fake 
 
 On the first visit, create the owner login. Then go to **Integrations → Add an account** for each Instagram account. Each account gets its own `Social Media/<Account>/Inbox` folder inside `DATA_DIR`, or inside `WATCH_ROOT` if you set it.
 
+## Deploy on Render
+
+`render.yaml` at the repository root is a Render Blueprint. It creates one Docker web service with a 10 GB persistent disk for the database, media and reports.
+
+1. Merge this branch into `main`. The deploy link uses the default branch.
+2. Open https://render.com/deploy?repo=https://github.com/Rahulanand11/Qualitymanagementsystem, sign in, and allow Render to access the repo.
+3. Render asks for the values marked `sync: false`. Paste `META_APP_ID`, `META_APP_SECRET` and `ANTHROPIC_API_KEY`. Any of them can be left empty and added later under *Environment*; the service restarts with the new values. `ALERT_WEBHOOK_URL` is optional.
+4. Click **Apply**. The first build takes a few minutes. Your address is `https://social-agency.onrender.com`, or `social-agency-xxxx.onrender.com` if that name is taken.
+5. In the service's **Environment** tab, copy the generated `SETUP_TOKEN`. Open your address and create the owner login with it. This stops anyone else who finds the URL from claiming the account first.
+6. In your Meta app, set the OAuth redirect URI to `https://<your-address>/api/integrations/instagram/callback`. The Integrations page shows the exact value.
+
+Notes:
+- **Cost:** the Starter instance (about $7/month) plus about $0.25/GB/month for the disk. Free instances have no persistent disk, so connected accounts and media would be lost on every restart.
+- **Public URL:** `PUBLIC_BASE_URL` is taken from Render's `RENDER_EXTERNAL_URL` automatically. Set it yourself only if you add a custom domain.
+- **Keep it at one instance.** The worker runs inside the web service and the database is on the attached disk.
+- **Never change `TOKEN_ENCRYPTION_KEY`** after connecting accounts, or the stored Instagram tokens can't be decrypted. Render backs up disks daily, and you can download the data from the service's *Disks* tab.
+- **Uploads:** a desktop sync folder can't reach a cloud server, so on Render you upload through the dashboard (drag and drop on Content Library). Direct Google Drive / Dropbox polling is not built yet.
+
 ## What you need to do to go live
 
 1. **Meta app** (about 30 minutes, needs your Facebook developer login):

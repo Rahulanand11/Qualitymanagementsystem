@@ -95,12 +95,13 @@ function renderAuth() {
   el.innerHTML = `<div class="card"><h1>${setup ? "Set up your agency" : "Sign in"}</h1>
     <p class="sub">${setup ? "Create the owner login. You can invite editors and viewers later." : "Agency Console"}</p>
     <form id="authForm"><label class="field"><span>Email</span><input name="email" type="email" required autocomplete="username"></label>
+    ${setup && state.session.setup_token_required ? `<label class="field"><span>Setup code (SETUP_TOKEN from your hosting settings)</span><input name="setup_token" required autocomplete="off"></label>` : ""}
     <label class="field"><span>Password${setup ? " (10+ characters)" : ""}</span><input name="password" type="password" required minlength="${setup ? 10 : 1}" autocomplete="${setup ? "new-password" : "current-password"}"></label>
     <button class="btn primary" style="width:100%">${setup ? "Create owner account" : "Sign in"}</button></form></div>`;
   $("#authForm").onsubmit = async (e) => {
     e.preventDefault();
     const f = new FormData(e.target);
-    await act(() => api(setup ? "/api/setup" : "/api/login", { method: "POST", body: { email: f.get("email"), password: f.get("password") } }));
+    await act(() => api(setup ? "/api/setup" : "/api/login", { method: "POST", body: { email: f.get("email"), password: f.get("password"), setup_token: f.get("setup_token") || "" } }));
     boot();
   };
 }
