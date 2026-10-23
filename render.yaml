@@ -1,0 +1,44 @@
+# Render Blueprint for the AI social media agency (social-agency/).
+# Deploy: https://render.com/deploy?repo=https://github.com/Rahulanand11/Qualitymanagementsystem
+# One instance runs the dashboard and the background worker together; data (database, media,
+# reports) lives on the persistent disk, so the service must stay at a single instance.
+services:
+  - type: web
+    name: social-agency
+    runtime: docker
+    dockerfilePath: ./social-agency/Dockerfile
+    dockerContext: ./social-agency
+    plan: starter            # persistent disks need a paid instance type
+    numInstances: 1
+    healthCheckPath: /healthz
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - social-agency/**
+    disk:
+      name: agency-data
+      mountPath: /data
+      sizeGB: 10
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATA_DIR
+        value: /data
+      - key: SECRET_KEY
+        generateValue: true
+      - key: TOKEN_ENCRYPTION_KEY   # never change this after accounts are connected
+        generateValue: true
+      - key: SETUP_TOKEN            # needed once to create the owner login
+        generateValue: true
+      - key: META_APP_ID
+        sync: false
+      - key: META_APP_SECRET
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: AI_MODEL
+        value: claude-opus-5-5
+      - key: AI_MONTHLY_BUDGET_USD
+        value: "50"
+      - key: ALERT_WEBHOOK_URL
+        sync: false
